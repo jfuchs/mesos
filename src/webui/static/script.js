@@ -1,17 +1,21 @@
 
 $(function() {
-    // 
-    // $.getJSON('http://localhost:5050/master/state.json', function(data) {
-    //   alert(data);
-    // });
+
+  var details_template = _.template("\
+  <dl>\
+    <dt>Server:</dt>\
+    <dd><%= response['pid'] %></dd>\
+    <dt>Built:</dt>\
+    <dd><%= response['build_date'] %></dd>\
+    <dt>Started:</dt>\
+    <dd><%= response['start_time'] %></dd>\
+    <dt>ID:</dt>\
+    <dd><%= response['id'] %></dd>\
+  </dl>");
   
-  $.ajax({
-    dataType: 'jsonp',
-    // jsonp: 'jsonp_callback',
-    url: 'http://localhost:5050/master/state.json',
-    success: function () {
-      alert('hi');
-    },
+  $.getJSON('/static/fake/stats.json', function(data) {
+    console.log(data);
+    $('#test_details').html(details_template({response:data}));
   });
   
 });

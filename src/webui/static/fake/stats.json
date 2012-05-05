@@ -1,0 +1,17 @@
+{
+  "build_date":"2012-05-04 16:22:54",
+  "build_user":"jon",
+  "completed_frameworks":[],
+  "frameworks":[],
+  "id":"201205041713184614922-5050-82894",
+  "pid":"master@10.0.1.11:5050",
+  "slaves":[{
+    "hostname":"jetsam.local",
+    "id":"201205041713184614922-5050-82894-2",
+    "registered_time":1336177031,
+    "resources":{"cpus":4, "mem":1024},
+    "webui_hostname":"jetsam.local",
+    "webui_port":8081
+  }],
+  "start_time":1336176795
+}
