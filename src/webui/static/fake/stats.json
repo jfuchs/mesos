@@ -1,17 +1,162 @@
 {
-  "build_date":"2012-05-04 16:22:54",
-  "build_user":"jon",
-  "completed_frameworks":[],
-  "frameworks":[],
-  "id":"201205041713184614922-5050-82894",
-  "pid":"master@10.0.1.11:5050",
-  "slaves":[{
-    "hostname":"jetsam.local",
-    "id":"201205041713184614922-5050-82894-2",
-    "registered_time":1336177031,
-    "resources":{"cpus":4, "mem":1024},
-    "webui_hostname":"jetsam.local",
-    "webui_port":8081
-  }],
-  "start_time":1336176795
+    "build_date": "2012-05-04 18:34:16", 
+    "build_user": "benh", 
+    "completed_frameworks": [
+        {
+            "active": 0, 
+            "completed_tasks": [
+                {
+                    "framework_id": "201205061501100728842-5050-58450-0000", 
+                    "id": "0", 
+                    "name": "Task 0", 
+                    "resources": {
+                        "cpus": 1, 
+                        "mem": 32
+                    }, 
+                    "slave_id": "201205061501100728842-5050-58450-0", 
+                    "state": "TASK_RUNNING"
+                }, 
+                {
+                    "framework_id": "201205061501100728842-5050-58450-0000", 
+                    "id": "1", 
+                    "name": "Task 1", 
+                    "resources": {
+                        "cpus": 1, 
+                        "mem": 32
+                    }, 
+                    "slave_id": "201205061501100728842-5050-58450-0", 
+                    "state": "TASK_RUNNING"
+                }, 
+                {
+                    "framework_id": "201205061501100728842-5050-58450-0000", 
+                    "id": "2", 
+                    "name": "Task 2", 
+                    "resources": {
+                        "cpus": 1, 
+                        "mem": 32
+                    }, 
+                    "slave_id": "201205061501100728842-5050-58450-0", 
+                    "state": "TASK_RUNNING"
+                }, 
+                {
+                    "framework_id": "201205061501100728842-5050-58450-0000", 
+                    "id": "3", 
+                    "name": "Task 3", 
+                    "resources": {
+                        "cpus": 1, 
+                        "mem": 32
+                    }, 
+                    "slave_id": "201205061501100728842-5050-58450-0", 
+                    "state": "TASK_RUNNING"
+                }
+            ], 
+            "id": "201205061501100728842-5050-58450-0000", 
+            "name": "Long Lived Framework (C++)", 
+            "offers": [], 
+            "registered_time": 1336342421, 
+            "reregistered_time": 1336342421, 
+            "resources": {
+                "cpus": 0, 
+                "mem": 0
+            }, 
+            "tasks": [], 
+            "unregistered_time": 1336342449, 
+            "user": "benh"
+        }, 
+        {
+            "active": 0, 
+            "completed_tasks": [], 
+            "id": "201205061501100728842-5050-58450-0001", 
+            "name": "Long Lived Framework (C++)", 
+            "offers": [], 
+            "registered_time": 1336342456, 
+            "reregistered_time": 1336342456, 
+            "resources": {
+                "cpus": 0, 
+                "mem": 0
+            }, 
+            "tasks": [], 
+            "unregistered_time": 1336342459, 
+            "user": "benh"
+        }
+    ], 
+    "frameworks": [
+        {
+            "active": 1, 
+            "completed_tasks": [], 
+            "id": "201205061501100728842-5050-58450-0002", 
+            "name": "Long Lived Framework (C++)", 
+            "offers": [], 
+            "registered_time": 1336342465, 
+            "reregistered_time": 1336342465, 
+            "resources": {
+                "cpus": 4, 
+                "mem": 128
+            }, 
+            "tasks": [
+                {
+                    "framework_id": "201205061501100728842-5050-58450-0002", 
+                    "id": "0", 
+                    "name": "Task 0", 
+                    "resources": {
+                        "cpus": 1, 
+                        "mem": 32
+                    }, 
+                    "slave_id": "201205061501100728842-5050-58450-1", 
+                    "state": "TASK_RUNNING"
+                }, 
+                {
+                    "framework_id": "201205061501100728842-5050-58450-0002", 
+                    "id": "1", 
+                    "name": "Task 1", 
+                    "resources": {
+                        "cpus": 1, 
+                        "mem": 32
+                    }, 
+                    "slave_id": "201205061501100728842-5050-58450-1", 
+                    "state": "TASK_RUNNING"
+                }, 
+                {
+                    "framework_id": "201205061501100728842-5050-58450-0002", 
+                    "id": "2", 
+                    "name": "Task 2", 
+                    "resources": {
+                        "cpus": 1, 
+                        "mem": 32
+                    }, 
+                    "slave_id": "201205061501100728842-5050-58450-1", 
+                    "state": "TASK_RUNNING"
+                }, 
+                {
+                    "framework_id": "201205061501100728842-5050-58450-0002", 
+                    "id": "3", 
+                    "name": "Task 3", 
+                    "resources": {
+                        "cpus": 1, 
+                        "mem": 32
+                    }, 
+                    "slave_id": "201205061501100728842-5050-58450-1", 
+                    "state": "TASK_RUNNING"
+                }
+            ], 
+            "unregistered_time": 2.142721948e-314, 
+            "user": "benh"
+        }
+    ], 
+    "id": "201205061501100728842-5050-58450", 
+    "pid": "master@10.0.1.6:5050", 
+    "slaves": [
+        {
+            "hostname": "tw-mbp15-bhindman.local", 
+            "id": "201205061501100728842-5050-58450-1", 
+            "registered_time": 1336342513, 
+            "resources": {
+                "cpus": 4, 
+                "mem": 1024
+            }, 
+            "webui_hostname": "tw-mbp15-bhindman.local", 
+            "webui_port": 8081
+        }
+    ], 
+    "start_time": 1336341717
 }
