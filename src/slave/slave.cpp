@@ -1398,7 +1398,7 @@ void Slave::executorExited(const FrameworkID& frameworkId,
   bool isCommandExecutor = false;
 
   // Transition all live tasks to TASK_LOST/TASK_FAILED.
-  foreachvalue (Task* task, executor->launchedTasks) {
+  foreachvalue (Task* task, utils::copy(executor->launchedTasks)) {
     if (!isTerminalTaskState(task->state())) {
       isCommandExecutor = !task->has_executor_id();
 
@@ -1411,7 +1411,7 @@ void Slave::executorExited(const FrameworkID& frameworkId,
   }
 
   // Transition all queued tasks to TASK_LOST/TASK_FAILED.
-  foreachvalue (const TaskInfo& task, executor->queuedTasks) {
+  foreachvalue (const TaskInfo& task, utils::copy(executor->queuedTasks)) {
     isCommandExecutor = task.has_command();
 
     transitionLiveTask(task.task_id(),
@@ -1420,7 +1420,6 @@ void Slave::executorExited(const FrameworkID& frameworkId,
                        isCommandExecutor,
                        status);
   }
-
 
   if (!isCommandExecutor) {
     ExitedExecutorMessage message;
