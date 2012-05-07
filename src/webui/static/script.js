@@ -30,7 +30,11 @@ $(function() {
   var slaves_template = _.template("\
   <% _.each(response['slaves'], function(slave) { %>\
     <tr>\
-      <td><a href=\"http://<%= slave['webui_hostname'] %>:<%= slave['webui_port'] %>/\"><%= slave['hostname'] %></a></td>\
+      <td>\
+        <a href=\"http://<%= slave['webui_hostname'] %>:<%= slave['webui_port'] %>/\">\
+          <%= slave['hostname'] %>\
+        </a>\
+      </td>\
       <td><%= slave['resources']['cpus'] %></td>\
       <td><%= slave['resources']['mem'] %></td>\
       <td><%= format_unix_timestamp_reasonably(slave['registered_time']) %></td>\
@@ -51,7 +55,7 @@ $(function() {
   <% }); %>\
   ");
   
-  $.getJSON('/static/fake/stats.json', function(data) {
+  $.getJSON('/master/state.json', function(data) {
     $('[data-slot=machine_details]').html(details_template({response:data}));
     $('[data-slot=frameworks]').html(frameworks_template({response:data}));
     $('[data-slot=slaves]').html(slaves_template({response:data}));
