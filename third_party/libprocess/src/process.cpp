@@ -53,6 +53,7 @@
 #include <process/future.hpp>
 #include <process/gc.hpp>
 #include <process/id.hpp>
+#include <process/mime.hpp>
 #include <process/process.hpp>
 #include <process/socket.hpp>
 #include <process/timer.hpp>
@@ -139,6 +140,14 @@ string generate(const string& prefix)
 }
 
 } // namespace ID {
+
+
+namespace mime {
+
+map<string, string> types;
+
+} // namespace mime {
+
 
 // Provides reference counting semantics for a process pointer.
 class ProcessReference
@@ -969,9 +978,9 @@ void send_file(struct ev_loop* loop, ev_io* watcher, int revents)
       // Socket error or closed.
       if (length < 0) {
         const char* error = strerror(errno);
-        VLOG(2) << "Socket error while sending: " << error;
+        VLOG(1) << "Socket error while sending: " << error;
       } else {
-        VLOG(2) << "Socket closed while sending";
+        VLOG(1) << "Socket closed while sending";
       }
       socket_manager->close(s);
       delete encoder;
@@ -1359,6 +1368,9 @@ void initialize(const string& delegate)
   // Create global garbage collector.
   gc = spawn(new GarbageCollector());
 
+  // Initialize the mime types.
+  mime::initialize();
+
   char temp[INET_ADDRSTRLEN];
   if (inet_ntop(AF_INET, (in_addr*) &__ip__, temp, INET_ADDRSTRLEN) == NULL) {
     PLOG(FATAL) << "Failed to initialize, inet_ntop";
@@ -1513,6 +1525,8 @@ void HttpProxy::process(Future<HttpResponse>* future, bool persist)
         out << s.st_size;
         response.headers["Content-Length"] = out.str();
 
+        VLOG(1) << "Sending file at '" << path << "' with length " << s.st_size;
+
         // TODO(benh): Consider a way to have the socket manager turn
         // on TCP_CORK for both sends and then turn it off.
         socket_manager->send(response, socket, true);
@@ -1625,6 +1639,8 @@ void SocketManager::link(ProcessBase* process, const UPID& to)
 
 PID<HttpProxy> SocketManager::proxy(int s)
 {
+  HttpProxy* proxy = NULL;
+
   synchronized (this) {
     // This socket might have been asked to get closed (e.g., remote
     // side hang up) while a process is attempting to handle an HTTP
@@ -1633,12 +1649,20 @@ PID<HttpProxy> SocketManager::proxy(int s)
       if (proxies.count(s) > 0) {
         return proxies[s]->self();
       } else {
-        HttpProxy* proxy = new HttpProxy(sockets[s]);
-        spawn(proxy, true);
+        proxy = new HttpProxy(sockets[s]);
         proxies[s] = proxy;
-        return proxy->self();
       }
     }
+  }
+
+  // Now check if we need to spawn a newly created proxy. Note that we
+  // need to do this outside of the synchronized block above to avoid
+  // a possible deadlock (because spawn eventually synchronizes on
+  // ProcessManager and ProcessManager::cleanup synchronizes on
+  // ProcessManager and then SocketManager, so a deadlock results if
+  // we do spawn within the synchronized block above).
+  if (proxy != NULL) {
+    return spawn(proxy, true);
   }
 
   return PID<HttpProxy>();
@@ -1810,7 +1834,8 @@ Encoder* SocketManager::next(int s)
   }
 
   // We terminate the proxy outside the synchronized block to avoid
-  // possible deadlock between the ProcessManager and SocketManager.
+  // possible deadlock between the ProcessManager and SocketManager
+  // (see comment in SocketManager::proxy for more information).
   if (proxy != NULL) {
     terminate(proxy);
   }
@@ -2688,7 +2713,7 @@ void ProcessBase::visit(const DispatchEvent& event)
 
 void ProcessBase::visit(const HttpEvent& event)
 {
-  VLOG(2) << "Handling HTTP event for process '" << pid.id << "'"
+  VLOG(1) << "Handling HTTP event for process '" << pid.id << "'"
           << " with path: '" << event.request->path << "'";
 
   CHECK(event.request->path.find('/') == 0); // See ProcessManager::deliver.
@@ -2716,16 +2741,29 @@ void ProcessBase::visit(const HttpEvent& event)
 
     // Now call the handler and associate the response with the promise.
     promise->associate(handlers.http[name](*event.request));
-  } else if (resources.count(name) > 0) {
+  } else if (assets.count(name) > 0) {
     HttpOKResponse response;
-    response.headers["Content-Type"] = resources[name].type;
     response.type = HttpResponse::PATH;
-    response.path = resources[name].path;
+    response.path = assets[name].path;
 
     // Construct the final path by appending remaining tokens.
     for (int i = 2; i < tokens.size(); i++) {
       response.path += "/" + tokens[i];
     }
+
+    // Try and determine the Content-Type.
+    size_t index = response.path.find_last_of('.');
+
+    if (index != string::npos) {
+      string extension = response.path.substr(index);
+      if (assets[name].types.count(extension) > 0) {
+        response.headers["Content-Type"] = assets[name].types[extension];
+      }
+    }
+
+    // TODO(benh): Use "text/plain" for assets that don't have an
+    // extension or we don't have a mapping for? It might be better to
+    // just let the browser guess (or do it's own default).
 
     // Get the HttpProxy pid for this socket.
     PID<HttpProxy> proxy = socket_manager->proxy(event.socket);
