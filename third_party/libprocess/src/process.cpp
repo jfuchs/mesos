@@ -2048,6 +2048,24 @@ bool ProcessManager::handle(
     return false;
   }
 
+  // Ignore requests with relative paths (i.e., contain "/..").
+  if (request->path.find("/..") != string::npos) {
+    VLOG(1) << "Returning '404 Not Found' for '" << request->path
+            << "' (ignoring requests with relative paths)";
+
+    // Get the HttpProxy pid for this socket.
+    PID<HttpProxy> proxy = socket_manager->proxy(socket);
+
+    // Enqueue the response with the HttpProxy so that it respects the
+    // order of requests to account for HTTP/1.1 pipelining.
+    dispatch(proxy, &HttpProxy::enqueue,
+             HttpNotFoundResponse(), request->keepAlive);
+
+    // Cleanup request.
+    delete request;
+    return false;
+  }
+
   // Split the path by '/'.
   vector<string> tokens = tokenize(request->path, "/");
 
