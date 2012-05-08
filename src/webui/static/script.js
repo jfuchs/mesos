@@ -1,3 +1,109 @@
+Mesos = {
+  Views: {}, // Backbone.js View classes
+  Partials: {
+    details:    _.template($("#partial-details").html()),
+    frameworks: _.template($("#partial-frameworks").html()),
+    slaves:     _.template($("#partial-slaves").html()),
+    history:    _.template($("#partial-history").html()),
+  } // Underscore templates we are using for subsets of the page
+};
+
+// Home view -- the dashboard
+Mesos.Views.HomeView = Backbone.View.extend({
+  template: _.template($("#template-root").html()),
+  initialize: function() {
+    $(document.body).bind('data_updated', this.update);
+  },
+  render: function() {
+    $(this.el).html(this.template({})); // renders the empty page, not populated by data
+    this.update();
+  },
+  update: function() {
+    if (Mesos.state) {
+      $('[data-slot=details]').html(Mesos.Partials.details({state: Mesos.state}));
+      $('[data-slot=frameworks]').html(Mesos.Partials.frameworks({state: Mesos.state}));
+      $('[data-slot=slaves]').html(Mesos.Partials.slaves({state: Mesos.state}));
+      $('[data-slot=history]').html(Mesos.Partials.history({state: Mesos.state}));
+    }
+  }
+});
+
+// Frameworks List -- lists out all active frameworks
+Mesos.Views.FrameworksListView = Backbone.View.extend({
+  render: function() {
+    $(this.el).html('This would be a list of frameworks'); // TODO
+  }
+});
+
+// Frameworks List -- lists out all active frameworks
+Mesos.Views.FrameworkView = Backbone.View.extend({
+  render: function() {
+    $(this.el).html('This would be a page for the framework with ID ' + this.model); // TODO
+  }
+});
+
+
+// Request routing
+Mesos.Router = Backbone.Router.extend({
+  routes: {
+    '': 'getHome',
+    'frameworks': 'getFrameworkList',
+    'frameworks/:id': 'getFramework'
+  },
+  getHome: function() {
+    new Mesos.Views.HomeView({ el: $("#main_content") }).render();
+  },
+  getFrameworkList: function() {
+    new Mesos.Views.FrameworksListView({ el: $("#main_content") }).render();
+  },
+  getFramework: function(id) {
+    console.log(id)
+    
+    new Mesos.Views.FrameworkView({ el: $('#main_content'), model: id }).render();
+  }
+});
+Mesos.router = new Mesos.Router;
+Backbone.history.start();
+
+Mesos.resources = {
+  total_cpus: 0,
+  total_mem: 0,
+  running_cpus: 0,
+  running_mem: 0
+};
+
+// Loop to update our state & derivative data:
+var update_data = function() {
+  $.getJSON('/master/state.json', function(state) {
+    Mesos.state = state;
+
+    Mesos.resources = {
+      total_cpus: 0,
+      total_mem: 0,
+      running_cpus: 0,
+      running_mem: 0
+    };
+
+    _.each(state.slaves, function(slave) {
+      Mesos.resources.total_cpus += slave.resources.cpus;
+      Mesos.resources.total_mem += slave.resources.mem;
+    });
+
+    _.each(state.frameworks, function(framework) {
+      Mesos.resources.running_cpus += framework.resources.cpus;
+      Mesos.resources.running_mem += framework.resources.mem;
+    });
+
+    $(document.body).trigger('data_updated');
+    setTimeout('update_data()', 2000);
+  });
+};
+update_data();
+
+
+
+
+
 // TODO: find a decent date parsing library
 function format_unix_timestamp_reasonably(ts) {
   var date = new Date(ts * 1000);
@@ -8,165 +114,7 @@ function format_unix_timestamp_reasonably(ts) {
   var h = date.getUTCHours();
   var n = date.getUTCMinutes();
   var s = date.getUTCSeconds();
-  
-  // var result = [y,m,d].join('-') + ' ' + [h,n,s].join(':');
   var result = y + '-' + m + '-' + d + ' ' + h + ':' + n + ':' + s;
   return result;
 }
 
-
-var resources = {
-  total_cpus: 0,
-  total_mem: 0,
-  running_cpus: 0,
-  running_mem: 0
-};
-
-
-var update = function() {
-  
-  var details_template = _.template("\
-  <dt>Server:</dt>\
-  <dd><%= state['pid'].split(\"@\")[1] %></dd>\
-  <dt>Built:</dt>\
-  <dd><%= state['build_date'] %> (local?)</dd>\
-  <dt>Started:</dt>\
-  <dd><%= format_unix_timestamp_reasonably(state['start_time']) %> (UTC)</dd>\
-  <dt>ID:</dt>\
-  <dd><%= state['id'] %></dd>\
-  ");
-
-  var frameworks_template = _.template("\
-  <% _.each(state['frameworks'], function(framework) { %>\
-    <tr>\
-      <td><%= framework['id'] %></td>\
-      <td><%= framework['user'] %></td>\
-      <td><%= framework['name'] %></td>\
-      <td><%= framework['tasks'].length %></td>\
-      <td><%= framework['resources']['cpus'] %></td>\
-      <td><%= framework['resources']['mem'] %></td>\
-      <td>TODO</td>\
-      <% var registered_time = new Date(framework['registered_time'] * 1000);\
-         var reregistered_time = new Date(framework['reregistered_time'] * 1000);\
-      %>\
-      <td><%= registered_time.toLocaleString() %></td>\
-      <td><%= registered_time.getTime() == reregistered_time.getTime() ? '' : reregistered_time.toLocaleString() %></td>\
-    </tr>\
-  <% }); %>\
-  ");
-  
-  var slaves_template = _.template("\
-  <% _.each(state['slaves'], function(slave) { %>\
-    <tr>\
-      <td>\
-        <a href=\"http://<%= slave['webui_hostname'] %>:<%= slave['webui_port'] %>/\">\
-          <%= slave['hostname'] %>\
-        </a>\
-      </td>\
-      <td><%= slave['resources']['cpus'] %></td>\
-      <td><%= slave['resources']['mem'] %></td>\
-      <td><%= format_unix_timestamp_reasonably(slave['registered_time']) %></td>\
-      <td><%= slave['id'] %></td>\
-    </tr>\
-  <% }); %>\
-  ");
-  
-  var history_template = _.template("\
-  <% _.each(state['completed_frameworks'], function(history) { %>\
-    <tr>\
-      <td><%= history['id'] %></td>\
-      <td><%= history['user'] %></td>\
-      <td><%= history['name'] %></td>\
-      <% var registered_time = new Date(history['registered_time'] * 1000);\
-         var reregistered_time = new Date(history['reregistered_time'] * 1000);\
-      %>\
-      <td><%= registered_time.toLocaleString() %></td>\
-      <td><%= registered_time.getTime() == reregistered_time.getTime() ? '' : reregistered_time.toLocaleString() %></td>\
-    </tr>\
-  <% }); %>\
-  ");
-  
-  $.getJSON('/master/state.json', function(state) {
-    $('[data-slot=details]').html(details_template({state: state}));
-    $('[data-slot=frameworks]').html(frameworks_template({state: state}));
-    $('[data-slot=slaves]').html(slaves_template({state: state}));
-    $('[data-slot=history]').html(history_template({state: state}));
-
-    // Update the total cpus and memory in use.
-    resources.total_cpus = 0;
-    resources.total_mem = 0;
-
-    _.each(state['slaves'], function(slave) {
-      resources.total_cpus += slave['resources']['cpus'];
-      resources.total_mem += slave['resources']['mem'];
-    });
-
-    resources.running_cpus = 0;
-    resources.running_mem = 0;
-
-    _.each(state['frameworks'], function(framework) {
-      resources.running_cpus += framework['resources']['cpus'];
-      resources.running_mem += framework['resources']['mem'];
-    });
-  });
-
-  setTimeout("update()", 2000);
-}
-
-$(function() { update(); });
-
-
-var context = cubism.context()
-    .step(1000)
-    .size(600);
-
-d3.select("#graph").selectAll(".axis")
-    .data(["top", "bottom"])
-  .enter().append("div")
-    .attr("class", function(d) { return d + " axis"; })
-    .each(function(d) { d3.select(this).call(context.axis().ticks(12).orient(d)); });
-
-d3.select("#graph").append("div")
-    .attr("class", "rule")
-    .call(context.rule());
-
-d3.select("#graph").selectAll(".horizon")
-    .data([metric_cpus(), metric_mem()])
-  .enter().insert("div", ".bottom")
-    .attr("class", "horizon")
-    .call(context.horizon().extent([0, 100]));
-
-context.on("focus", function(i) {
-  d3.selectAll(".value").style("right", i == null ? null : context.size() - i + "px");
-});
-
-
-function metric_cpus() {
-  return context.metric(function(start, stop, step, callback) {
-    // Convert the start and stop "dates" into milliseconds.
-    start = +start, stop = +stop;
-
-    var values = [];
-    _((stop - start) / step).times(function() {
-      values.push(resources.running_cpus);
-    });
-
-    // Return the data requested.
-    callback(null, values);
-  }, "cpus");
-}
-
-function metric_mem() {
-  return context.metric(function(start, stop, step, callback) {
-    // Convert the start and stop "dates" into milliseconds.
-    start = +start, stop = +stop;
-
-    var values = [];
-    _((stop - start) / step).times(function() {
-      values.push(resources.running_mem);
-    });
-
-    // Return the data requested.
-    callback(null, values);
-  }, "mem");
-}
