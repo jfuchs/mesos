@@ -69,7 +69,21 @@
     </div>
 
     <div ng-controller="MainCntl">
+
       <div ng-view></div>
+
+      <div class="modal hide fade" style="display: none;" id="error-modal">
+        <div class="modal-header">
+          <button class="close" data-dismiss="modal">×</button>
+          <h3>Failed to connect to {{$location.host()}}:{{$location.port()}}!</h3>
+        </div>
+        <div class="modal-body">
+          <p>(This will automagically disappear once we can reconnect.)</p>
+        </div>
+        <div class="modal-footer">
+        </div>
+      </div>
+
     </div>
 
   </body>

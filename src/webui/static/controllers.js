@@ -7,10 +7,18 @@
 // active controller/view to easily access anything in scope (e.g.,
 // the state).
 function MainCntl($scope, $http, $route, $routeParams, $location, $defer) {
+
+  $scope.$location = $location;
+
   var update = function() {
-    $http.get('master/state.json').success(function(data) {
-      $scope.state = data;
-    });
+    $http.get('master/state.json')
+      .success(function(data) {
+        $scope.state = data;
+        $('#error-modal').modal('hide');
+      })
+      .error(function(data) {
+        $('#error-modal').modal('show');
+      });
     $defer(update, 2000);
   }
   update();
