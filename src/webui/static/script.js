@@ -1,14 +1,16 @@
 Mesos = {
   Views: {}, // Backbone.js View classes
   Partials: {
-    details:    _.template($("#partial-details").html()),
-    frameworks: _.template($("#partial-frameworks").html()),
-    slaves:     _.template($("#partial-slaves").html()),
-    history:    _.template($("#partial-history").html()),
+    details:          _.template($("#partial-details").html()),
+    frameworksTable:  _.template($("#partial-frameworks-table").html()),
+    slavesTable:      _.template($("#partial-slaves-table").html()),
+    historyTable:     _.template($("#partial-history-table").html()),
+    frameworkDetails: _.template($("#partial-framework-details").html()),
+    tasksTable:       _.template($("#partial-tasks-table").html()),
   } // Underscore templates we are using for subsets of the page
 };
 
-// Home view -- the dashboard
+// Present a home view.
 Mesos.Views.HomeView = Backbone.View.extend({
   template: _.template($("#template-root").html()),
   initialize: function() {
@@ -21,27 +23,52 @@ Mesos.Views.HomeView = Backbone.View.extend({
   update: function() {
     if (Mesos.state) {
       $('[data-slot=details]').html(Mesos.Partials.details({state: Mesos.state}));
-      $('[data-slot=frameworks]').html(Mesos.Partials.frameworks({state: Mesos.state}));
-      $('[data-slot=slaves]').html(Mesos.Partials.slaves({state: Mesos.state}));
-      $('[data-slot=history]').html(Mesos.Partials.history({state: Mesos.state}));
+      $('[data-slot=frameworks]').html(Mesos.Partials.frameworksTable({state: Mesos.state}));
+      $('[data-slot=slaves]').html(Mesos.Partials.slavesTable({state: Mesos.state}));
+      $('[data-slot=history]').html(Mesos.Partials.historyTable({state: Mesos.state}));
     }
   }
 });
 
-// Frameworks List -- lists out all active frameworks
+// List several frameworks.
 Mesos.Views.FrameworksListView = Backbone.View.extend({
+  template: _.template($("#template-frameworks-list").html()),
+  initialize: function() {
+    $(document.body).bind('data_updated', this.update);
+  },
   render: function() {
-    $(this.el).html('This would be a list of frameworks'); // TODO
+    $(this.el).html(this.template({}));
+    this.update();
+  },
+  update: function() {
+    if (Mesos.state) {
+      $('[data-slot=frameworks]').html(Mesos.Partials.frameworksTable({state: Mesos.state}));
+    }
   }
 });
 
-// Frameworks List -- lists out all active frameworks
+// Show detail of a specific framework.
 Mesos.Views.FrameworkView = Backbone.View.extend({
+  template: _.template($("#template-framework").html()),
+  initialize: function() {
+    _(this).bindAll(['update']);
+    $(document.body).bind('data_updated', this.update);
+  },
   render: function() {
-    $(this.el).html('This would be a page for the framework with ID ' + this.model); // TODO
+    $(this.el).html(this.template({id:this.id}));
+    this.update();
+  },
+  update: function() {
+    if (Mesos.state) {
+      var framework = _(Mesos.state.frameworks).find(function(framework) { return framework.id == this.id }, this);
+      if (framework) {
+        $('[data-slot=running-tasks-table]').html(Mesos.Partials.tasksTable({tasks:framework.tasks}));
+        $('[data-slot=completed-tasks-table]').html(Mesos.Partials.tasksTable({tasks:framework.completed_tasks}));
+        $('[data-slot=framework-details]').html(Mesos.Partials.frameworkDetails(framework));
+      }
+    }
   }
 });
-
 
 // Request routing
 Mesos.Router = Backbone.Router.extend({
@@ -57,13 +84,13 @@ Mesos.Router = Backbone.Router.extend({
     new Mesos.Views.FrameworksListView({ el: $("#main_content") }).render();
   },
   getFramework: function(id) {
-    console.log(id)
-    
-    new Mesos.Views.FrameworkView({ el: $('#main_content'), model: id }).render();
+    new Mesos.Views.FrameworkView({ el: $('#main_content'), id: id }).render();
   }
 });
 Mesos.router = new Mesos.Router;
-Backbone.history.start();
+$(function() {
+  Backbone.history.start();
+});
 
 Mesos.resources = {
   total_cpus: 0,
