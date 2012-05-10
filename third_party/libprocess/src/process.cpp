@@ -1525,6 +1525,11 @@ void HttpProxy::process(Future<HttpResponse>* future, bool persist)
         out << s.st_size;
         response.headers["Content-Length"] = out.str();
 
+        if (s.st_size == 0) {
+          socket_manager->send(response, socket, persist);
+          return;
+        }
+
         VLOG(1) << "Sending file at '" << path << "' with length " << s.st_size;
 
         // TODO(benh): Consider a way to have the socket manager turn
