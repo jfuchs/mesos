@@ -19,6 +19,7 @@ function MainCntl($scope, $http, $route, $routeParams, $location, $defer) {
       .error(function(data) {
         $('#error-modal').modal('show');
       });
+    $.event.trigger('state_updated');
     $defer(update, 2000);
   }
   update();
@@ -62,11 +63,22 @@ function DashboardCtrl($scope) {
   $scope.$on('$beforeRouteChange', function() { });
 }
 
-
 function FrameworksCtrl($scope) {
 }
 
-
 function FrameworkCtrl($scope, $routeParams) {
   $scope.id = $routeParams.id;
+  
+  var fetchFramework = function() {
+    if ($scope.state && $scope.state.frameworks) {
+      // TODO(jfuchs) this is an O(n) lookup for our framework. If we restructured the state JSON
+      // to store frameworks as a dict instead of an array, we could make the framework lookup
+      // faster.
+      $scope.framework = _($scope.state.frameworks).find(function(framework) {
+        return framework.id == $scope.id
+      }, this);
+    }
+  }
+  fetchFramework();
+  $(document).on('state_updated', fetchFramework);
 }

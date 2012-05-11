@@ -1,1 +1,77 @@
-Framework {{id}}
+<ul class="breadcrumb">
+  <li>
+    <a href="#">Home</a> <span class="divider">/</span>
+  </li>
+  <li>
+    <a href="#/frameworks">Frameworks</a> <span class="divider">/</span>
+  </li>
+  <li class="active">{{id}}</li>
+  <li class="active">{{framework.name}}</li>
+</ul>
+  
+<div class="row">
+  <div class="span3">
+    <div class="well">
+      <dl>
+        <dt>Name:</dt>
+        <dd>{{framework.name}}</dd>
+        <dt>ID:</dt>
+        <dd>{{framework.id}}</dd>
+        <dt>User:</dt>
+        <dd>{{framework.user}}</dd>
+        <dt>Registered:</dt>
+        <dd>{{framework.registered_time}}</dd>
+        <dt>Re-registered:</dt>
+        <dd>{{framework.reregistered_time}}</dd>
+        <dt>Running tasks:</dt>
+        <dd>{{framework.tasks.length}}</dd>
+        <dt>CPUs:</dt>
+        <dd>{{framework.resources.cpus}}</dd>
+        <dt>Mem:</dt>
+        <dd>{{framework.resources.mem}}</dd>
+      </dl>
+    </div>
+  </div>
+    
+  <div class="span9">
+    <h2 id="frameworks">Running Tasks</h2>
+    <table class="table table-striped table-bordered table-condensed">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>State</th>
+          <th>Slave</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr ng-repeat="task in framework.tasks">
+          <td>{{task.id}}</td>
+          <td>{{task.name}}</td>
+          <td>{{task.state}}</td>
+          <td>{{task.slave_id}}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2 id="frameworks">Completed Tasks</h2>
+    <table class="table table-striped table-bordered table-condensed">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>State</th>
+          <th>Slave</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr ng-repeat="task in framework.completed_tasks">
+          <td>{{task.id}}</td>
+          <td>{{task.name}}</td>
+          <td>{{task.state}}</td>
+          <td>{{task.slave_id}}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
