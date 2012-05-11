@@ -1,7 +1,6 @@
 <div class="row">
   <div class="span3">
     <div class="well">
-      <h2>Details</h2>
       <dl data-slot="details">
         <dt>Server:</dt>
         <dd>{{state.pid.split("@")[1]}}</dd>
@@ -49,7 +48,10 @@
   </div>
   
   <div class="span9">
-    <h2>Frameworks</h2>
+    <h2>
+      Active Frameworks
+      <small>(<a href="#/frameworks">see all</a>)</small>
+    </h2>
     <table class="table table-striped table-bordered table-condensed">
       <thead>
         <tr>
@@ -66,7 +68,7 @@
       </thead>
       <tbody>
         <tr ng-repeat="framework in state.frameworks">
-          <td>{{framework.id}}</td>
+          <td><span class="collapse-id">{{framework.id}}</span></td>
           <td>{{framework.user}}</td>
           <td><a href="{{'#/framework/' + framework.id}}">{{framework.name}}</a></td>
           <td>{{framework.tasks.length}}</td>
@@ -84,14 +86,15 @@
     <table class="table table-striped table-bordered table-condensed">
       <thead>
         <tr>
+          <th>ID</th>
           <th>Hostname</th>
           <th>CPUs</th>
           <th>Mem</th>
           <th>Connected at</th>
-          <th>ID</th>
         </tr>
       </thead>
       <tr ng-repeat="slave in state.slaves">
+        <td><span class="collapse-id">{{slave.id}}</span></td>
         <td>
           <a href="http://{{slave.webui_hostname}}:{{slave.webui_port}}/">
             {{slave.hostname}}
@@ -100,7 +103,6 @@
         <td>{{slave.resources.cpus}}</td>
         <td>{{slave.resources.mem}}</td>
         <td>{{slave.registered_time * 1000 | date:"MM/dd/yyyy H:mm:ss Z"}}</td>
-        <td>{{slave.id}}</td>
       </tr>
     </table>
     
@@ -123,7 +125,15 @@
           <th>Disconnected at</th>
         </tr>
       </thead>
-      <tbody data-slot="history"></tbody>
+      <tbody>
+        <tr ng-repeat="history in state.completed_frameworks">
+          <td><span class="collapse-id">{{history.id}}</span></td>
+          <td>{{history.user}}</td>
+          <td>{{history.name}}</td>
+          <td>TODO</td>
+          <td>TODO</td>
+        </tr>
+      </tbody>
     </table>
 
   </div>

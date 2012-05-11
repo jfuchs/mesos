@@ -59,12 +59,13 @@ function MainCntl($scope, $http, $route, $routeParams, $location, $defer) {
   poll();
 }
 
-
 function HomeCtrl($scope) {
+  setNavbarActiveTab('home');
 }
 
-
 function DashboardCtrl($scope) {
+  setNavbarActiveTab('dashboard');
+  
   // TODO(benh): I'm pretty sure this creates a new cubism context
   // each time. Either delete this context, or store the context
   // globally so that it can be referenced.
@@ -91,15 +92,16 @@ function DashboardCtrl($scope) {
   context.on("focus", function(i) {
     d3.selectAll(".value").style("right", i == null ? null : context.size() - i + "px");
   });
-
- // Do any cleanup before we change the route.
-  $scope.$on('$beforeRouteChange', function() { });
 }
 
 function FrameworksCtrl($scope) {
+  setNavbarActiveTab('frameworks');
+  
 }
 
 function FrameworkCtrl($scope, $routeParams) {
+  setNavbarActiveTab('frameworks');
+  
   $scope.id = $routeParams.id;
   
   var fetchFramework = function() {
@@ -114,4 +116,8 @@ function FrameworkCtrl($scope, $routeParams) {
   }
   fetchFramework();
   $(document).on('state_updated', fetchFramework);
+  $scope.$on('$beforeRouteChange', function() {
+    $(document).off('state_updated', fetchFramework);
+  });
+  
 }

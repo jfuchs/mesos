@@ -9,3 +9,8 @@ angular.module('mesos', []).
       .when('/framework/:id', {template: 'static/framework.html', controller: FrameworkCtrl})
       .otherwise({redirectTo: '/'});
   }]);
+
+function setNavbarActiveTab(tab_name) {
+  $('#navbar li').removeClass('active');
+  $('#navbar li[data-tabname='+tab_name+']').addClass('active');
+}
