@@ -1,5 +1,6 @@
 'use strict';
 
+
 // Main controller that can be used to handle "global" events. E.g.,:
 //     $scope.$on('$afterRouteChange', function() { ...; });
 //
@@ -9,25 +10,57 @@
 function MainCntl($scope, $http, $route, $routeParams, $location, $defer) {
 
   $scope.$location = $location;
+  $scope.delay = 2000;
+  $scope.retry = 0;
 
-  var update = function() {
+  var poll = function() {
     $http.get('master/state.json')
       .success(function(data) {
         $scope.state = data;
-        $('#error-modal').modal('hide');
+        $.event.trigger('state_updated');
+        $scope.delay = 2000;
+        $defer(poll, $scope.delay);
       })
       .error(function(data) {
+        if ($scope.delay >= 32000) {
+          $scope.delay = 2000;
+        } else {
+          $scope.delay = $scope.delay * 2;
+        }
+        $scope.retry = $scope.delay;
+        function countdown() {
+          if ($scope.retry == 0) {
+            $('#error-modal').modal('hide');
+          } else {
+            $scope.retry = $scope.retry - 1000;
+            $scope.countdown = $defer(countdown, 1000);
+          }
+        }
+        countdown();
         $('#error-modal').modal('show');
       });
-    $.event.trigger('state_updated');
-    $defer(update, 2000);
   }
-  update();
+
+  // Make it such that everytime we hide the error-modal, we stop the
+  // countdown and restart the polling.
+  $('#error-modal').on('hidden', function () {
+    if ($scope.countdown != undefined) {
+      if ($defer.cancel($scope.countdown)) {
+        $scope.delay = 2000; // Restart since they cancelled the countdown.
+      }
+    }
+
+    // Start polling again, but do it asynchronously (and wait at
+    // least a second because otherwise the error-modal won't get
+    // properly shown).
+    $defer(poll, 1000);
+  });
+
+  poll();
 }
 
 
 function HomeCtrl($scope) {
-
 }
 
 

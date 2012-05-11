@@ -80,7 +80,10 @@
           <h3>Failed to connect to {{$location.host()}}:{{$location.port()}}!</h3>
         </div>
         <div class="modal-body">
-          <p>(This will automagically disappear once we can reconnect.)</p>
+          <p>
+            Retrying in <b>{{retry / 1000}}</b> seconds ...
+            <a href="{{$location.path()}}" data-dismiss="modal">try now</a>.
+          </p>
         </div>
         <div class="modal-footer">
         </div>
