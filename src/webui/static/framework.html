@@ -22,10 +22,10 @@
         <dt>User:</dt>
         <dd>{{framework.user}}</dd>
         <dt>Registered:</dt>
-        <dd>{{framework.registered_time}}</dd>
+        <dd>{{framework.registered_time * 1000 | date:"MM/dd/yyyy H:mm:ss"}}</dd>
         <dt>Re-registered:</dt>
-        <dd>{{framework.reregistered_time}}</dd>
-        <dt>Running tasks:</dt>
+        <dd>{{framework.reregistered_time * 1000 | date:"MM/dd/yyyy H:mm:ss"}}</dd>
+        <dt>Active tasks:</dt>
         <dd>{{framework.tasks.length}}</dd>
         <dt>CPUs:</dt>
         <dd>{{framework.resources.cpus}}</dd>
@@ -36,7 +36,7 @@
   </div>
     
   <div class="span9">
-    <h2 id="frameworks">Running Tasks</h2>
+    <h2 id="frameworks">Active Tasks</h2>
     <table class="table table-striped table-bordered table-condensed">
       <thead>
         <tr>
@@ -56,7 +56,7 @@
       </tbody>
     </table>
 
-    <h2 id="frameworks">Completed Tasks</h2>
+    <h2 id="frameworks">Terminated Tasks</h2>
     <table class="table table-striped table-bordered table-condensed">
       <thead>
         <tr>
