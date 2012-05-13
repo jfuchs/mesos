@@ -16,7 +16,7 @@
           <th>ID</th>
           <th>User</th>
           <th>Name</th>
-          <th>Running Tasks</th>
+          <th>Active Tasks</th>
           <th>CPUs</th>
           <th>Mem</th>
           <th>Max Share</th>
@@ -25,14 +25,14 @@
         </tr>
       </thead>
       <tbody>
-        <tr ng-repeat="framework in state.frameworks">
+        <tr ng-repeat="framework in frameworks">
           <td><span class="collapse-id">{{framework.id}}</span></td>
           <td>{{framework.user}}</td>
           <td><a href="{{'#/framework/' + framework.id}}">{{framework.name}}</a></td>
           <td>{{framework.tasks.length}}</td>
           <td>{{framework.resources.cpus}}</td>
-          <td>{{framework.resources.mem}}</td>
-          <td>TODO</td>
+          <td>{{framework.resources.mem / 1024}} GB</td>
+          <td>{{framework.max_share * 100}}%</td>
           <td>{{framework.registered_time * 1000 | date:"MM/dd/yyyy H:mm:ss"}}</td>
           <td>{{framework.reregistered_time * 1000 | date:"MM/dd/yyyy H:mm:ss"}}</td>
         </tr>

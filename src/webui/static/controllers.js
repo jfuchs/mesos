@@ -1,6 +1,69 @@
 'use strict';
 
 
+// Update the outermost scope with the new state.
+function update($scope, data) {
+  $scope.state = data;
+
+  $scope.total_cpus = 0;
+  $scope.total_mem = 0;
+  $scope.used_cpus = 0;
+  $scope.used_mem = 0;
+  $scope.offered_cpus = 0;
+  $scope.offered_mem = 0;
+
+  _.each($scope.state.slaves, function(slave) {
+    $scope.total_cpus += slave.resources.cpus;
+    $scope.total_mem += slave.resources.mem;
+  });
+
+  $scope.frameworks = {};
+
+  _.each($scope.state.frameworks, function(framework) {
+      $scope.used_cpus += framework.resources.cpus;
+      $scope.used_mem += framework.resources.mem;
+
+      _.each(framework.offers, function(offer) {
+          $scope.offered_cpus = offer.resources.cpus;
+          $scope.offered_mem = offer.resources.mem;
+      });
+
+      $scope.frameworks[framework.id] = framework;
+
+      if ($scope.total_cpus > 0) {
+        $scope.frameworks[framework.id].cpus_share =
+          framework.resources.cpus / $scope.total_cpus;
+      } else {
+        $scope.frameworks[framework.id].cpus_share = 0;
+      }
+
+      if ($scope.total_mem > 0) {
+        $scope.frameworks[framework.id].mem_share =
+          framework.resources.mem / $scope.total_mem;
+      } else {
+        $scope.frameworks[framework.id].mem_share = 0;
+      }
+
+      $scope.frameworks[framework.id].max_share =
+        Math.max($scope.frameworks[framework.id].cpus_share,
+                 $scope.frameworks[framework.id].mem_share);
+  });
+
+  $scope.used_cpus -= $scope.offered_cpus;
+  $scope.used_mem -= $scope.offered_mem;
+
+  $scope.idle_cpus = $scope.total_cpus - ($scope.offered_cpus + $scope.used_cpus);
+  $scope.idle_mem = $scope.total_mem - ($scope.offered_mem + $scope.used_mem);
+
+  $scope.completed_frameworks = {};
+
+  _.each($scope.state.completed_frameworks, function(framework) {
+      $scope.completed_frameworks[framework.id] = framework;
+  });
+
+  $.event.trigger('state_updated');
+}
+
 // Main controller that can be used to handle "global" events. E.g.,:
 //     $scope.$on('$afterRouteChange', function() { ...; });
 //
@@ -16,8 +79,7 @@ function MainCntl($scope, $http, $route, $routeParams, $location, $defer) {
   var poll = function() {
     $http.get('master/state.json')
       .success(function(data) {
-        $scope.state = data;
-        $.event.trigger('state_updated');
+        update($scope, data);
         $scope.delay = 2000;
         $defer(poll, $scope.delay);
       })
@@ -87,23 +149,26 @@ function FrameworksCtrl($scope) {
 
 function FrameworkCtrl($scope, $routeParams) {
   setNavbarActiveTab('frameworks');
-  
-  $scope.id = $routeParams.id;
-  
-  var fetchFramework = function() {
-    if ($scope.state && $scope.state.frameworks) {
-      // TODO(jfuchs) this is an O(n) lookup for our framework. If we restructured the state JSON
-      // to store frameworks as a dict instead of an array, we could make the framework lookup
-      // faster.
-      $scope.framework = _($scope.state.frameworks).find(function(framework) {
-        return framework.id == $scope.id
-      }, this);
+
+  var update = function() {
+    if ($routeParams.id in $scope.completed_frameworks) {
+      $scope.framework = $scope.completed_frameworks[$routeParams.id];
+      $('#terminated-alert').show();
+      $('#framework').show();
+    } else if ($routeParams.id in $scope.frameworks) {
+      $scope.framework = $scope.frameworks[$routeParams.id];
+      $('#framework').show();
+    } else {
+      $('#missing-alert').show();
     }
   }
-  fetchFramework();
-  $(document).on('state_updated', fetchFramework);
+
+  if ($scope.state) {
+    update();
+  }
+
+  $(document).on('state_updated', update);
   $scope.$on('$beforeRouteChange', function() {
-    $(document).off('state_updated', fetchFramework);
+    $(document).off('state_updated', update);
   });
-  
 }

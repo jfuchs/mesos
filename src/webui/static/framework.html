@@ -10,8 +10,18 @@
     <em>({{framework.id}})</em>
   </li>
 </ul>
+
+<div class="alert hide" id="terminated-alert">
+  <button class="close" data-dismiss="alert">×</button>
+  <strong>This framework has terminated!</strong>
+</div>
+
+<div class="alert hide" id="missing-alert">
+  <button class="close" data-dismiss="alert">×</button>
+  <strong>No framework by that ID could be found!</strong>
+</div>
   
-<div class="row">
+<div class="row hide" id="framework">
   <div class="span3">
     <div class="well">
       <dl>
@@ -30,7 +40,7 @@
         <dt>CPUs:</dt>
         <dd>{{framework.resources.cpus}}</dd>
         <dt>Mem:</dt>
-        <dd>{{framework.resources.mem}}</dd>
+        <dd>{{framework.resources.mem / 1024}} GB</dd>
       </dl>
     </div>
   </div>
