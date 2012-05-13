@@ -12,20 +12,27 @@ function update($scope, data) {
   $scope.offered_cpus = 0;
   $scope.offered_mem = 0;
 
+  $scope.slaves = {};
+
   _.each($scope.state.slaves, function(slave) {
     $scope.total_cpus += slave.resources.cpus;
     $scope.total_mem += slave.resources.mem;
+
+    $scope.slaves[slave.id] = slave;
   });
 
   $scope.frameworks = {};
+  $scope.offers = {};
 
   _.each($scope.state.frameworks, function(framework) {
       $scope.used_cpus += framework.resources.cpus;
       $scope.used_mem += framework.resources.mem;
 
       _.each(framework.offers, function(offer) {
-          $scope.offered_cpus = offer.resources.cpus;
-          $scope.offered_mem = offer.resources.mem;
+        $scope.offered_cpus = offer.resources.cpus;
+        $scope.offered_mem = offer.resources.mem;
+
+        $scope.offers[offer.id] = offer;
       });
 
       $scope.frameworks[framework.id] = framework;
