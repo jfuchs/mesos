@@ -66,32 +66,18 @@ function HomeCtrl($scope) {
 function DashboardCtrl($scope) {
   setNavbarActiveTab('dashboard');
   
-  // TODO(benh): I'm pretty sure this creates a new cubism context
-  // each time. Either delete this context, or store the context
-  // globally so that it can be referenced.
   var context = cubism.context()
     .step(1000)
-    .size(600);
+    .size(1440);
 
-  d3.select("#graph").selectAll(".axis")
-    .data(["top", "bottom"])
-    .enter().append("div")
-    .attr("class", function(d) { return d + " axis"; })
-    .each(function(d) { d3.select(this).call(context.axis().ticks(12).orient(d)); });
+  // Create a "cpus" horizon.
+  horizons.create(context, "cpus", random(context, "cpus"), [0, 10], "cpus");
 
-  d3.select("#graph").append("div")
-    .attr("class", "rule")
-    .call(context.rule());
+  // Create a "mem" horizon.
+  horizons.create(context, "mem", random(context, "mem"), [0, 10], "mb");
 
-  d3.select("#graph").selectAll(".horizon")
-    .data([metric_cpus(context), metric_mem(context)])
-    .enter().insert("div", ".bottom")
-    .attr("class", "horizon")
-    .call(context.horizon().extent([0, 100]));
-
-  context.on("focus", function(i) {
-    d3.selectAll(".value").style("right", i == null ? null : context.size() - i + "px");
-  });
+ // Do any cleanup before we change the route.
+  $scope.$on('$beforeRouteChange', function() { context.stop(); });
 }
 
 function FrameworksCtrl($scope) {
