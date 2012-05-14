@@ -132,6 +132,40 @@ function HomeCtrl($scope) {
   setNavbarActiveTab('home');
 }
 
+var offset = -1;
+var log = '';
+
+function LogCtrl($scope, $http, $defer) {
+  setNavbarActiveTab('log');
+
+  $('#log').html(log);
+
+  var deferred = undefined;
+
+  var tail = function() {
+    $http.get('master/log.json?offset=' + offset)
+      .success(function(data) {
+        offset = data.offset + data.length;
+        if (data.length > 0) {
+          log += data.data;
+          $('#log').append(data.data);
+        }
+        deferred = $defer(tail, 1000);
+      })
+      .error(function(data, status) {
+        if (status == 404) {
+          $('#log-not-found-alert').show();
+        } else {
+          deferred = $defer(tail, 1000);
+        }
+      });
+  }
+
+  tail();
+
+  $scope.$on('$beforeRouteChange', function() { $defer.cancel(deferred); });
+}
+
 function DashboardCtrl($scope) {
   setNavbarActiveTab('dashboard');
   
@@ -145,7 +179,7 @@ function DashboardCtrl($scope) {
   // Create a "mem" horizon.
   horizons.create(context, "mem", random(context, "mem"), [0, 10], "mb");
 
- // Do any cleanup before we change the route.
+  // Do any cleanup before we change the route.
   $scope.$on('$beforeRouteChange', function() { context.stop(); });
 }
 
