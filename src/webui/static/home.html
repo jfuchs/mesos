@@ -68,7 +68,9 @@
       </thead>
       <tbody>
         <tr ng-repeat="framework in frameworks">
-          <td><span class="collapse-id">{{framework.id}}</span></td>
+          <td>
+            <abbr title="{{framework.id}}">{{framework.id | truncateMesosID}}</abbr>
+          </td>
           <td>{{framework.user}}</td>
           <td><a href="{{'#/framework/' + framework.id}}">{{framework.name}}</a></td>
           <td>{{framework.tasks.length}}</td>
@@ -94,7 +96,9 @@
         </tr>
       </thead>
       <tr ng-repeat="slave in state.slaves">
-        <td><span class="collapse-id">{{slave.id}}</span></td>
+          <td>
+            <abbr title="{{slave.id}}">{{slave.id | truncateMesosID}}</abbr>
+          </td>
         <td>
           <a href="http://{{slave.webui_hostname}}:{{slave.webui_port}}/">
             {{slave.hostname}}
@@ -118,7 +122,9 @@
       </thead>
       <tbody>
         <tr ng-repeat="offer in offers">
-          <td><span class="collapse-id">{{offer.id}}</span></td>
+          <td>
+            <abbr title="{{offer.id}}">{{offer.id | truncateMesosID}}</abbr>
+          </td>
           <td><a href="{{'#/framework/' + offer.framework_id}}">{{frameworks[offer.framework_id].name}}</a></td>
           <td>
             <a href="http://{{slaves[offer.slave_id].webui_hostname}}:{{slaves[offer.slave_id].webui_port}}/">
@@ -143,7 +149,9 @@
       </thead>
       <tbody>
         <tr ng-repeat="framework in completed_frameworks">
-          <td><span class="collapse-id">{{framework.id}}</span></td>
+          <td>
+            <abbr title="{{framework.id}}">{{framework.id | truncateMesosID}}</abbr>
+          </td>
           <td>{{framework.user}}</td>
           <td><a href="{{'#/framework/' + framework.id}}">{{framework.name}}</a></td>
           <td>{{framework.registered_time * 1000 | date:"MM/dd/yyyy H:mm:ss"}}</td>

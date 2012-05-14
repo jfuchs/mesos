@@ -9,7 +9,13 @@ angular.module('mesos', []).
       .when('/frameworks', {template: 'static/frameworks.html', controller: FrameworksCtrl})
       .when('/framework/:id', {template: 'static/framework.html', controller: FrameworkCtrl})
       .otherwise({redirectTo: '/'});
-  }]);
+  }])
+  .filter('truncateMesosID', function() {
+    return function(id) {
+      var short_id =  id.split('-').splice(2,2).join('-');
+      return '…' + short_id;
+    }
+  });
 
 function setNavbarActiveTab(tab_name) {
   $('#navbar li').removeClass('active');
