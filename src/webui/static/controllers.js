@@ -234,3 +234,7 @@ function FrameworkCtrl($scope, $routeParams) {
     $(document).off('state_updated', update);
   });
 }
+
+function SlavesCtrl($scope) {
+  setNavbarActiveTab('slaves');
+}

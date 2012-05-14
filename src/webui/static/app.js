@@ -8,6 +8,7 @@ angular.module('mesos', []).
       .when('/log', {template: 'static/log.html', controller: LogCtrl})
       .when('/frameworks', {template: 'static/frameworks.html', controller: FrameworksCtrl})
       .when('/framework/:id', {template: 'static/framework.html', controller: FrameworkCtrl})
+      .when('/slaves', {template: 'static/slaves.html', controller: SlavesCtrl})
       .otherwise({redirectTo: '/'});
   }])
   .filter('truncateMesosID', function() {
