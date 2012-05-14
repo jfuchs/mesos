@@ -354,6 +354,7 @@ Future<HttpResponse> log(
 
   if (size == -1) {
     PLOG(WARNING) << "Failed to seek in the log";
+    close(fd.get());
     return HttpInternalServerErrorResponse();
   }
 
@@ -371,6 +372,7 @@ Future<HttpResponse> log(
     // Seek to the offset we want to read from.
     if (lseek(fd.get(), offset, SEEK_SET) == -1) {
       PLOG(WARNING) << "Failed to seek in the log";
+      close(fd.get());
       return HttpInternalServerErrorResponse();
     }
 
@@ -386,6 +388,7 @@ Future<HttpResponse> log(
     } else if (length == -1) {
       PLOG(WARNING) << "Failed to read from the log";
       delete[] temp;
+      close(fd.get());
       return HttpInternalServerErrorResponse();
     } else {
       object.values["offset"] = offset;
@@ -397,6 +400,8 @@ Future<HttpResponse> log(
     object.values["offset"] = size;
     object.values["length"] = 0;
   }
+
+  close(fd.get());
 
   std::ostringstream out;
 
