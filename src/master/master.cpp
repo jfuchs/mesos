@@ -412,8 +412,8 @@ void Master::initialize()
   // Remove any trailing '/' in directory.
   directory = strings::remove(directory, "/", strings::SUFFIX);
 
-  provide("", directory + "/static/index.html");
-  provide("static", directory + "/static");
+  provide("", directory + "/master/static/index.html");
+  provide("static", directory + "/master/static");
 }
 
 
