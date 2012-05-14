@@ -401,6 +401,7 @@ void Master::initialize()
   route("vars", bind(&http::vars, cref(*this), params::_1));
   route("stats.json", bind(&http::json::stats, cref(*this), params::_1));
   route("state.json", bind(&http::json::state, cref(*this), params::_1));
+  route("log.json", bind(&http::json::log, cref(*this), params::_1));
 
   // Use either a directory specified via configuration options (which
   // is necessary for running out of the build directory before 'make
