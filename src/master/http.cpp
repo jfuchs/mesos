@@ -160,7 +160,7 @@ Future<HttpResponse> vars(
     const Master& master,
     const HttpRequest& request)
 {
-  LOG(INFO) << "HTTP request for '" << request.path << "'";
+  VLOG(1) << "HTTP request for '" << request.path << "'";
 
   // TODO(benh): Consider separating collecting the actual vars we
   // want to display from rendering them. Trying to just create a
@@ -193,7 +193,7 @@ Future<HttpResponse> stats(
     const Master& master,
     const HttpRequest& request)
 {
-  LOG(INFO) << "HTTP request for '" << request.path << "'";
+  VLOG(1) << "HTTP request for '" << request.path << "'";
 
   JSON::Object object;
   object.values["uptime"] = Clock::now() - master.startTime;
@@ -250,7 +250,7 @@ Future<HttpResponse> state(
     const Master& master,
     const HttpRequest& request)
 {
-  LOG(INFO) << "HTTP request for '" << request.path << "'";
+  VLOG(1) << "HTTP request for '" << request.path << "'";
 
   JSON::Object object;
   object.values["build_date"] = build::DATE;
@@ -306,7 +306,7 @@ Future<HttpResponse> log(
     const Master& master,
     const HttpRequest& request)
 {
-  LOG(INFO) << "HTTP request for '" << request.path << "'";
+  VLOG(1) << "HTTP request for '" << request.path << "'";
 
   map<string, vector<string> > pairs =
     strings::pairs(request.query, ";&", "=");
