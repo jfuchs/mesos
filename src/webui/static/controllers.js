@@ -145,11 +145,32 @@ function LogCtrl($scope, $http, $defer) {
   var tail = function() {
     $http.get('master/log.json?offset=' + offset)
       .success(function(data) {
-        offset = data.offset + data.length;
-        if (data.length > 0) {
-          log += data.data;
-          $('#log').append(data.data);
+        // Get the last "page" of data if this was the first time.
+        if (offset == -1) {
+          // TODO(benh): Define a "page" size.
+          if (data.offset > 1000) {
+            offset = data.offset - 1000;
+          } else {
+            offset = 0;
+          }
+          deferred = $defer(tail, 0);
+          return;
+        } else {
+          offset = data.offset + data.length;
         }
+
+        if (data.length > 0) {
+          // Truncate to the first newline if this is the first time
+          // (and we aren't reading from the beginning of the log).
+          if (log == '' && data.offset != 0) {
+            log = data.data.substring(data.data.indexOf("\n") + 1);
+            $('#log').append(log);
+          } else {
+            log += data.data;
+            $('#log').append(data.data);
+          }
+        }
+
         deferred = $defer(tail, 1000);
       })
       .error(function(data, status) {
