@@ -17,3 +17,9 @@ dl.inline dd + dd {
 dl.inline dt {
   font-weight: bold
 }
+
+td.shadeout {
+  color: #ccc;
+  font-style: italic;
+/*  vertical-align: middle;*/
+}
